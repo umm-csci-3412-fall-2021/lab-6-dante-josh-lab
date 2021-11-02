@@ -19,6 +19,8 @@ public class EchoServer {
 
     private void start() throws IOException, InterruptedException {
         ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
+	//Fixed thread example
+	ExecutorService pool = Executors.newFixedThreadPool(3);
         while (true) {
             Socket socket = serverSocket.accept();
 
@@ -30,8 +32,10 @@ public class EchoServer {
 	    // Create thread
             Thread clientInputThread = new Thread(clientInput);
 
+	    pool.execute(clientInputThread);
+
 	    // Singe Thread Example
-            clientInputThread.start();
+            // clientInputThread.start();
         }
     }
 
@@ -59,7 +63,7 @@ public class EchoServer {
                     socketOutputStream.flush();
                 }
                 
-		// Close Socket Connection
+		// Close Socket Connectioin
                 socket.close();
             }  catch(IOException ioe) {
                 System.out.println("We caught an unexpected exception");
