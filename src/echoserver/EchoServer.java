@@ -24,7 +24,10 @@ public class EchoServer {
 
             InputStream socketInputStream = socket.getInputStream();
             OutputStream socketOutputStream = socket.getOutputStream();
+
+	    // Create instance of class that will act as thread code
             RetransmitData clientInput = new RetransmitData(socket, socketInputStream, socketOutputStream);
+	    // Create thread
             Thread clientInputThread = new Thread(clientInput);
 
 	    // Singe Thread Example
@@ -56,6 +59,7 @@ public class EchoServer {
                     socketOutputStream.flush();
                 }
                 
+		// Close Socket Connection
                 socket.close();
             }  catch(IOException ioe) {
                 System.out.println("We caught an unexpected exception");
