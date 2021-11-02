@@ -5,27 +5,61 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class EchoServer {
-	
-	// REPLACE WITH PORT PROVIDED BY THE INSTRUCTOR
-	public static final int PORT_NUMBER = 0; 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		EchoServer server = new EchoServer();
-		server.start();
-	}
 
-	private void start() throws IOException, InterruptedException {
-		ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
-		while (true) {
-			Socket socket = serverSocket.accept();
+    // REPLACE WITH PORT PROVIDED BY THE INSTRUCTOR
+    public static final int PORT_NUMBER = 6013;
+    public static void main(String[] args) throws IOException, InterruptedException {
+        EchoServer server = new EchoServer();
+        server.start();
+    }
 
-			// Put your code here.
-			// This should do very little, essentially:
-			//   * Construct an instance of your runnable class
-			//   * Construct a Thread with your runnable
-			//      * Or use a thread pool
-			//   * Start that thread
-		}
-	}
+    private void start() throws IOException, InterruptedException {
+        ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
+        while (true) {
+            Socket socket = serverSocket.accept();
+
+            InputStream socketInputStream = socket.getInputStream();
+            OutputStream socketOutputStream = socket.getOutputStream();
+            RetransmitData clientInput = new RetransmitData(socket, socketInputStream, socketOutputStream);
+            Thread clientInputThread = new Thread(clientInput);
+
+	    // Singe Thread Example
+            clientInputThread.start();
+        }
+    }
+
+    public class RetransmitData implements Runnable {
+        Socket socket;
+        InputStream socketInputStream;
+        OutputStream socketOutputStream;
+
+        public RetransmitData(Socket socket, InputStream socketInputStream, OutputStream socketOutputStream) {
+            this.socket = socket;
+            this.socketInputStream = socketInputStream;
+            this.socketOutputStream = socketOutputStream;
+        }
+
+        @Override
+        public void run() {
+            try {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+
+                //Read data sent by client socket
+                while ((bytesRead = socketInputStream.read(buffer)) != -1) {
+                    // Write data back to client
+                    socketOutputStream.write(buffer, 0 , bytesRead);
+                    socketOutputStream.flush();
+                }
+                
+                socket.close();
+            }  catch(IOException ioe) {
+                System.out.println("We caught an unexpected exception");
+            }
+        }
+    }
 }
