@@ -20,7 +20,9 @@ public class EchoServer {
     private void start() throws IOException, InterruptedException {
         ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
 	//Fixed thread example
-	ExecutorService pool = Executors.newFixedThreadPool(3);
+	//ExecutorService pool = Executors.newFixedThreadPool(3);
+	// Cached Thread example
+	ExecutorService pool = Executors.newCachedThreadPool();
         while (true) {
             Socket socket = serverSocket.accept();
 
